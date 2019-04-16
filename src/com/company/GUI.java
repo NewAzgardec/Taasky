@@ -4,95 +4,35 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-/*import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-import org.xml.sax.*;
-import org.w3c.dom.*;*/
+import java.beans.XMLEncoder;
+import java.io.*;
+import java.util.ArrayList;
 
+class GUI extends JFrame {
 
-public class GUI extends JFrame {
-
-    static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    public static int sizeWidth = 800;
-    public static int sizeHeight = 600;
-    public static int locationX = (screenSize.width - sizeWidth);
-    public static int locationY = (screenSize.height - sizeHeight);
+    private static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    private static int sizeWidth = 800;
+    private static int sizeHeight = 600;
+    private static int locationX = (screenSize.width - sizeWidth);
+    private static int locationY = (screenSize.height - sizeHeight);
 
     private DefaultListModel<String> names = new DefaultListModel<>();
-    private JList listBox = new JList(names);
-//    private String called = null;
-//
-//    private final String[] data = { "Тарзан","Человек-паук", "Аквамен", "Шерлок", "Сотня"};
+    private JList<String> listBox = new JList<>(names);
 
-    public GUI() {
-       /* super("Фильмы и сериалы");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+    GUI() {
 
-        final JPanel contents = new JPanel();
-        contents.setSize(400,200);
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("Options");
+        menuBar.setBackground(Color.LIGHT_GRAY);
+        JMenuItem exitItem = new JMenuItem("Exit");
+        fileMenu.add(exitItem);
 
-        for (String string : data) {
-            names.add(0, string);
-        }
-
-
-        final JTextField text= new JTextField();
-
-
-        JButton add = new JButton("Добавить");
-        add.addActionListener(new ActionListener() {
-            @Override
+        exitItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                names.add(names.getSize(), text.getText());
-
+                System.exit(0);
             }
         });
-
-        JButton remove = new JButton("Просмотрено");
-        remove.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int []arr = listBox.getSelectedIndices();
-                for(int i = 0; i < arr.length; ++i) {
-                    names.remove(arr[i]);
-                }
-
-                *//*if (listBox.getSelectedIndex()!=-1) {
-                    names.remove(listBox.getSelectedIndex() + 1);
-                    System.out.println("Hi");
-                }
-*//*
-
-
-            }
-        } );
-
-
-
-
-
-
-        JList<String> list2 = new JList<>(names);
-
-
-        contents.add(text);
-        contents.add(add);
-        contents.add(remove);
-        contents.add(new JScrollPane(list2));
-
-
-
-
-        setContentPane(contents);
-
-        setSize(400, 200);
-        setVisible(true);
-    }
-}
-*/
-
+        menuBar.add(fileMenu);
 
         final JList<String> list = new JList<>();
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -108,17 +48,12 @@ public class GUI extends JFrame {
                 new ActionEvent(list, ActionEvent.ACTION_PERFORMED, null)
         );
 
-        //JButton updateListButton = new JButton("Update list");
-        final JButton updateLookAndFeelButton = new JButton("Update Look&Feel");
+        final JButton updateLookAndFeelButton = new JButton("Update Theme");
 
-        JPanel btnPannel = new JPanel();
-        btnPannel.setLayout(new BoxLayout(btnPannel, BoxLayout.LINE_AXIS));
-        //btnPannel.add(updateListButton);
-        btnPannel.add(Box.createHorizontalStrut(5));
-        btnPannel.add(updateLookAndFeelButton);
-
+        JPanel btnPanel = new JPanel();
+        btnPanel.add(updateLookAndFeelButton);
         JPanel bottomPanel = new JPanel();
-        bottomPanel.add(btnPannel);
+        bottomPanel.add(btnPanel);
 
         final JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -126,26 +61,28 @@ public class GUI extends JFrame {
         panel.add(topPanel, BorderLayout.CENTER);
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
-
-
-
-
-
-//        JPanel homePanel = new JPanel();
-//        homePanel.setLayout(new BorderLayout());
-
         final JTextField textField = new JTextField();
-
-
         JScrollPane tasksScrollPane = new JScrollPane(listBox);
 
+//        FileOutputStream out = null;
+//        try {
+//            out = new FileOutputStream("my.xml");
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        XMLEncoder xmlEncoder = new XMLEncoder(out);
+//        xmlEncoder.writeObject(listBox);
+//        xmlEncoder.flush();
+//        xmlEncoder.close();
 
         JButton addButton = new JButton("Add");
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                names.add(names.getSize(), textField.getText());
-
+                if (textField.getText() != null && !textField.getText().equals("")) {
+                    names.add(names.getSize(), textField.getText());
+                    textField.setText("");
+                }
             }
         });
 
@@ -154,44 +91,34 @@ public class GUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int[] arr = listBox.getSelectedIndices();
-                for (int i = 0; i < arr.length; ++i) {
-                    names.remove(arr[i]);
+                for (int i1 : arr) {
+                    names.remove(i1);
                 }
-
             }
         });
 
-        JPanel addRemovePannel = new JPanel();
-        addRemovePannel.setLayout(new BoxLayout(addRemovePannel, BoxLayout.LINE_AXIS));
-        btnPannel.add(addButton);
-        btnPannel.add(Box.createHorizontalStrut(5));
-        btnPannel.add(removeButton);
+        JPanel addRemovePanel = new JPanel();
+        addRemovePanel.setLayout(new BoxLayout(addRemovePanel, BoxLayout.LINE_AXIS));
+        btnPanel.add(addButton);
+        btnPanel.add(Box.createHorizontalStrut(5));
+        btnPanel.add(removeButton);
 
         topPanel.add(textField, BorderLayout.NORTH);
         topPanel.add(tasksScrollPane);
-       // topPanel.add(addRemovePannel);
-
-
-
-
-
-//        homePanel.add(textField, BorderLayout.CENTER);
-//        homePanel.add(tasksScrollPane, BorderLayout.CENTER);
-//        homePanel.add(addRemovePannel, BorderLayout.SOUTH);
-
-
-
 
         JFrame frame = new JFrame("Taasky");
         frame.setBounds(locationX, locationY, sizeWidth, sizeHeight);
-        //frame.setMinimumSize(new Dimension(300, 200));
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(panel);
         frame.pack();
         frame.setVisible(true);
 
+        frame.setJMenuBar(menuBar);
 
-        //updateListButton.addActionListener(updateButtonListener);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
         updateLookAndFeelButton.addActionListener(
                 new UpdateLookAndFeelAction(frame, list)
         );

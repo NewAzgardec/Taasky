@@ -4,9 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.XMLEncoder;
-import java.io.*;
-import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class GUI extends JFrame {
 
@@ -49,7 +48,7 @@ class GUI extends JFrame {
         );
 
         final JButton updateLookAndFeelButton = new JButton("Update Theme");
-
+        updateLookAndFeelButton.setToolTipText("Click to change your theme");
         JPanel btnPanel = new JPanel();
         btnPanel.add(updateLookAndFeelButton);
         JPanel bottomPanel = new JPanel();
@@ -62,6 +61,7 @@ class GUI extends JFrame {
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
         final JTextField textField = new JTextField();
+        textField.setToolTipText("Enter task");
         JScrollPane tasksScrollPane = new JScrollPane(listBox);
 
 //        FileOutputStream out = null;
@@ -76,10 +76,22 @@ class GUI extends JFrame {
 //        xmlEncoder.close();
 
         JButton addButton = new JButton("Add");
+        addButton.setToolTipText("Click to add");
+
+        final JLabel label = new JLabel();
+        label.setForeground(Color.red);
+        label.setFont(new Font("Consolas", Font.PLAIN, 16));
+
+
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (textField.getText() != null && !textField.getText().equals("")) {
+                Pattern p = Pattern.compile("(([0-9]){0,}([a-zA-Z])([\\.]){0,})+");
+                Matcher m = p.matcher(textField.getText());
+                if (!m.matches()) {
+                    label.setText("Вводите только цифры, буквы и символ \".\"");
+                    textField.setText("");
+                } else {
                     names.add(names.getSize(), textField.getText());
                     textField.setText("");
                 }
@@ -87,6 +99,7 @@ class GUI extends JFrame {
         });
 
         JButton removeButton = new JButton("Delete");
+        removeButton.setToolTipText("Click to remove");
         removeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -114,6 +127,8 @@ class GUI extends JFrame {
         frame.setVisible(true);
 
         frame.setJMenuBar(menuBar);
+
+        frame.add(label, BorderLayout.SOUTH);
 
         frame.pack();
         frame.setLocationRelativeTo(null);

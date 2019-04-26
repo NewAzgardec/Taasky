@@ -9,36 +9,80 @@ import java.util.regex.Pattern;
 
 class GUI extends JFrame {
 
+    private String FRAME = "Taasky";
+    private String OPTIONS = "Options";
+    private String ENGLISH = "Eng List";
+    private String RUSSIAN = "Rus List";
+    private String EXIT = "Exit";
+    private String UPDATE = "Update Theme";
+    private String ADD = "Add";
+    private String DELETE = "Delete";
+    private String LABEL = " You can only enter numbers, english letters, and symbol \".\"";
+    private String TIP_UPDATE = "Click to change your theme";
+    private String TIP_TEXTFIELD = "Enter task";
+    private String TIP_ADD = "Click to add";
+    private String TIP_DELETE = "Click to remove";
+
+    private JFrame frame;
+    private JMenuBar menuBar;
+    private JMenu fileMenu;
+    private JMenuItem englishList;
+    private JMenuItem russianList;
+    private JMenuItem exitItem;
+    private JScrollPane listScrollPane;
+    private JPanel topPanel;
+    private JPanel btnPanel;
+    private JPanel bottomPanel;
+    private JScrollPane tasksScrollPane;
+    private JButton removeButton;
+    private JButton addButton;
+    private JPanel addRemovePanel;
+    private final JPanel panel;
+    private final JTextField textField;
+    private final JLabel label;
+
+    private Pattern pattern;
+    private Matcher matcher;
+
     private static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    private static int sizeWidth = 800;
-    private static int sizeHeight = 600;
+    private static int sizeWidth = 600;
+    private static int sizeHeight = 400;
     private static int locationX = (screenSize.width - sizeWidth);
     private static int locationY = (screenSize.height - sizeHeight);
 
+    private final JList<String> list;
     private DefaultListModel<String> names = new DefaultListModel<>();
     private JList<String> listBox = new JList<>(names);
+    private int[] arr;
 
-    GUI() {
 
-        JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("Options");
+    public GUI() {
+
+        menuBar = new JMenuBar();
+        fileMenu = new JMenu(OPTIONS);
         menuBar.setBackground(Color.LIGHT_GRAY);
-        JMenuItem exitItem = new JMenuItem("Exit");
+        englishList = new JMenuItem(ENGLISH);
+        russianList = new JMenuItem(RUSSIAN);
+        exitItem = new JMenuItem(EXIT);
+        fileMenu.add(englishList);
+        fileMenu.add(russianList);
         fileMenu.add(exitItem);
 
-        exitItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
+        russianList.addActionListener(e -> {
+
+            frame.setVisible(false);
+            new RusGUI();
+
         });
+        exitItem.addActionListener(e -> System.exit(0));
         menuBar.add(fileMenu);
 
-        final JList<String> list = new JList<>();
+        list = new JList<>();
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        JScrollPane listScrollPane = new JScrollPane(list);
+        listScrollPane = new JScrollPane(list);
 
-        JPanel topPanel = new JPanel();
+        topPanel = new JPanel();
         topPanel.setLayout(new BorderLayout());
         topPanel.add(listScrollPane, BorderLayout.WEST);
 
@@ -47,22 +91,22 @@ class GUI extends JFrame {
                 new ActionEvent(list, ActionEvent.ACTION_PERFORMED, null)
         );
 
-        final JButton updateLookAndFeelButton = new JButton("Update Theme");
-        updateLookAndFeelButton.setToolTipText("Click to change your theme");
-        JPanel btnPanel = new JPanel();
+        final JButton updateLookAndFeelButton = new JButton(UPDATE);
+        updateLookAndFeelButton.setToolTipText(TIP_UPDATE);
+        btnPanel = new JPanel();
         btnPanel.add(updateLookAndFeelButton);
-        JPanel bottomPanel = new JPanel();
+        bottomPanel = new JPanel();
         bottomPanel.add(btnPanel);
 
-        final JPanel panel = new JPanel();
+        panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         panel.setLayout(new BorderLayout());
         panel.add(topPanel, BorderLayout.CENTER);
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
-        final JTextField textField = new JTextField();
-        textField.setToolTipText("Enter task");
-        JScrollPane tasksScrollPane = new JScrollPane(listBox);
+        textField = new JTextField();
+        textField.setToolTipText(TIP_TEXTFIELD);
+        tasksScrollPane = new JScrollPane(listBox);
 
 //        FileOutputStream out = null;
 //        try {
@@ -75,42 +119,45 @@ class GUI extends JFrame {
 //        xmlEncoder.flush();
 //        xmlEncoder.close();
 
-        JButton addButton = new JButton("Add");
-        addButton.setToolTipText("Click to add");
+        addButton = new JButton(ADD);
+        addButton.setToolTipText(TIP_ADD);
 
-        final JLabel label = new JLabel();
+        label = new JLabel();
         label.setForeground(Color.red);
         label.setFont(new Font("Consolas", Font.PLAIN, 16));
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        label.setVerticalAlignment(SwingConstants.CENTER);
 
 
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Pattern p = Pattern.compile("(([0-9]){0,}([a-zA-Z])([\\.]){0,})+");
-                Matcher m = p.matcher(textField.getText());
-                if (!m.matches()) {
-                    label.setText("Вводите только цифры, буквы и символ \".\"");
+                pattern = Pattern.compile("(([0-9]){0,}([a-zA-Z])([,])*([\\.]){0,})+");
+                matcher = pattern.matcher(textField.getText());
+                if (!matcher.matches()) {
+                    label.setText(LABEL);
                     textField.setText("");
                 } else {
                     names.add(names.getSize(), textField.getText());
                     textField.setText("");
+                    label.setText("");
                 }
             }
         });
 
-        JButton removeButton = new JButton("Delete");
-        removeButton.setToolTipText("Click to remove");
+        removeButton = new JButton(DELETE);
+        removeButton.setToolTipText(TIP_DELETE);
         removeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int[] arr = listBox.getSelectedIndices();
+                arr = listBox.getSelectedIndices();
                 for (int i1 : arr) {
                     names.remove(i1);
                 }
             }
         });
 
-        JPanel addRemovePanel = new JPanel();
+        addRemovePanel = new JPanel();
         addRemovePanel.setLayout(new BoxLayout(addRemovePanel, BoxLayout.LINE_AXIS));
         btnPanel.add(addButton);
         btnPanel.add(Box.createHorizontalStrut(5));
@@ -119,20 +166,15 @@ class GUI extends JFrame {
         topPanel.add(textField, BorderLayout.NORTH);
         topPanel.add(tasksScrollPane);
 
-        JFrame frame = new JFrame("Taasky");
+        frame = new JFrame(FRAME);
         frame.setBounds(locationX, locationY, sizeWidth, sizeHeight);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(panel);
-        frame.pack();
-        frame.setVisible(true);
-
         frame.setJMenuBar(menuBar);
-
         frame.add(label, BorderLayout.SOUTH);
-
-        frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        frame.setResizable(false);
 
         updateLookAndFeelButton.addActionListener(
                 new UpdateLookAndFeelAction(frame, list)

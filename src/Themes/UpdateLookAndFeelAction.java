@@ -1,4 +1,4 @@
-package com.company;
+package Themes;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

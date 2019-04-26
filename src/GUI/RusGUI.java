@@ -1,4 +1,8 @@
-package com.company;
+package GUI;
+
+import Themes.UpdateListAction;
+import Themes.UpdateLookAndFeelAction;
+import Threads.ClockThreadRus;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,21 +11,24 @@ import java.awt.event.ActionListener;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class GUI extends JFrame {
+public class RusGUI extends JFrame {
+
+    public JLabel jLabelClock;
+    ClockThreadRus ctRus;
 
     private String FRAME = "Taasky";
-    private String OPTIONS = "Options";
-    private String ENGLISH = "Eng List";
-    private String RUSSIAN = "Rus List";
-    private String EXIT = "Exit";
-    private String UPDATE = "Update Theme";
-    private String ADD = "Add";
-    private String DELETE = "Delete";
-    private String LABEL = " You can only enter numbers, english letters, and symbol \".\"";
-    private String TIP_UPDATE = "Click to change your theme";
-    private String TIP_TEXTFIELD = "Enter task";
-    private String TIP_ADD = "Click to add";
-    private String TIP_DELETE = "Click to remove";
+    private String OPTIONS = "Опции";
+    private String ENGLISH = "Англ список";
+    private String RUSSIAN = "Рус список";
+    private String EXIT = "Выход";
+    private String UPDATE = "Обновить тему";
+    private String ADD = "Добавить";
+    private String DELETE = "Удалить";
+    private String LABEL = " Вы можете вводить только цифры, русские буквы, и символ \".\"";
+    private String TIP_UPDATE = "Нажмите, чтобы поменять тему";
+    private String TIP_TEXTFIELD = "Введите название задачи";
+    private String TIP_ADD = "Нажмите, чтобы добавить";
+    private String TIP_DELETE = "Нажмите, чтобы удалить";
 
     private JFrame frame;
     private JMenuBar menuBar;
@@ -56,7 +63,14 @@ class GUI extends JFrame {
     private int[] arr;
 
 
-    public GUI() {
+    public RusGUI() {
+
+        jLabelClock = new JLabel();
+        jLabelClock.setFont(new Font("Comin Sans MS", Font.BOLD, 16));
+        add(jLabelClock);
+        ctRus = new ClockThreadRus(this);
+        jLabelClock.setHorizontalAlignment(SwingConstants.CENTER);
+        jLabelClock.setVerticalAlignment(SwingConstants.CENTER);
 
         menuBar = new JMenuBar();
         fileMenu = new JMenu(OPTIONS);
@@ -68,10 +82,10 @@ class GUI extends JFrame {
         fileMenu.add(russianList);
         fileMenu.add(exitItem);
 
-        russianList.addActionListener(e -> {
+        englishList.addActionListener(e -> {
 
             frame.setVisible(false);
-            new RusGUI();
+            new GUI();
 
         });
         exitItem.addActionListener(e -> System.exit(0));
@@ -124,7 +138,7 @@ class GUI extends JFrame {
 
         label = new JLabel();
         label.setForeground(Color.red);
-        label.setFont(new Font("Consolas", Font.PLAIN, 16));
+        label.setFont(new Font("Comin Sans MS", Font.PLAIN, 16));
         label.setHorizontalAlignment(SwingConstants.CENTER);
         label.setVerticalAlignment(SwingConstants.CENTER);
 
@@ -132,7 +146,7 @@ class GUI extends JFrame {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                pattern = Pattern.compile("(([0-9]){0,}([a-zA-Z])([,])*([\\.]){0,})+");
+                pattern = Pattern.compile("(([0-9]){0,}([а-яА-Я])([\\.]){0,})+");
                 matcher = pattern.matcher(textField.getText());
                 if (!matcher.matches()) {
                     label.setText(LABEL);
@@ -172,6 +186,7 @@ class GUI extends JFrame {
         frame.add(panel);
         frame.setJMenuBar(menuBar);
         frame.add(label, BorderLayout.SOUTH);
+        frame.add(jLabelClock, BorderLayout.NORTH);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         frame.setResizable(false);

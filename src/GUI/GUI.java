@@ -8,6 +8,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +27,8 @@ public class GUI extends JFrame {
     private String UPDATE = "Update Theme";
     private String ADD = "Add";
     private String DELETE = "Delete";
-    private String LABEL = " You can only enter numbers, english letters, and symbol \".\"";
+    private String LABEL = "<html><p align=center> You can only enter numbers, english letters, and symbol \".\"</p></html>";
+    private String SYMBOLS = "<html><p align=center> The length of the string must be from 3 to 20 characters!</p></html>";
     private String TIP_UPDATE = "Click to change your theme";
     private String TIP_TEXTFIELD = "Enter task";
     private String TIP_ADD = "Click to add";
@@ -52,7 +56,7 @@ public class GUI extends JFrame {
     private Matcher matcher;
 
     private static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    private static int sizeWidth = 600;
+    private static int sizeWidth = 400;
     private static int sizeHeight = 400;
     private static int locationX = (screenSize.width - sizeWidth);
     private static int locationY = (screenSize.height - sizeHeight);
@@ -65,17 +69,12 @@ public class GUI extends JFrame {
 
     public GUI() {
 
-
         jLabelClock = new JLabel();
         jLabelClock.setFont(new Font("Comin Sans MS", Font.BOLD, 16));
         add(jLabelClock);
         ct = new ClockThread(this);
         jLabelClock.setHorizontalAlignment(SwingConstants.CENTER);
         jLabelClock.setVerticalAlignment(SwingConstants.CENTER);
-
-
-
-
 
         menuBar = new JMenuBar();
         fileMenu = new JMenu(OPTIONS);
@@ -93,12 +92,16 @@ public class GUI extends JFrame {
             new RusGUI();
 
         });
-        exitItem.addActionListener(e -> System.exit(0));
+        exitItem.addActionListener(e -> {
+            //writeMethod();
+            System.exit(0);
+        });
         menuBar.add(fileMenu);
 
         list = new JList<>();
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+        //readMethod();
         listScrollPane = new JScrollPane(list);
 
         topPanel = new JPanel();
@@ -126,17 +129,8 @@ public class GUI extends JFrame {
         textField = new JTextField();
         textField.setToolTipText(TIP_TEXTFIELD);
         tasksScrollPane = new JScrollPane(listBox);
-
-//        FileOutputStream out = null;
-//        try {
-//            out = new FileOutputStream("my.xml");
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        XMLEncoder xmlEncoder = new XMLEncoder(out);
-//        xmlEncoder.writeObject(listBox);
-//        xmlEncoder.flush();
-//        xmlEncoder.close();
+        DefaultListCellRenderer renderer =  (DefaultListCellRenderer)listBox.getCellRenderer();
+        renderer.setHorizontalAlignment(JLabel.CENTER);
 
         addButton = new JButton(ADD);
         addButton.setToolTipText(TIP_ADD);
@@ -147,11 +141,11 @@ public class GUI extends JFrame {
         label.setHorizontalAlignment(SwingConstants.CENTER);
         label.setVerticalAlignment(SwingConstants.CENTER);
 
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                pattern = Pattern.compile("(([0-9]){0,}([a-zA-Z])([,])*([\\.]){0,})+");
-                matcher = pattern.matcher(textField.getText());
+        addButton.addActionListener(e -> {
+            pattern = Pattern.compile("(([0-9]){0,}([a-zA-Z]){0,}([ ])*([, ])*([\\.]){0,})+");
+            matcher = pattern.matcher(textField.getText());
+
+            if (textField.getText().length() <= 30&textField.getText().length()>=3) {
                 if (!matcher.matches()) {
                     label.setText(LABEL);
                     textField.setText("");
@@ -160,6 +154,9 @@ public class GUI extends JFrame {
                     textField.setText("");
                     label.setText("");
                 }
+            } else {
+                label.setText(SYMBOLS);
+                textField.setText("");
             }
         });
 
@@ -181,7 +178,6 @@ public class GUI extends JFrame {
         btnPanel.add(Box.createHorizontalStrut(5));
         btnPanel.add(removeButton);
 
-
         topPanel.add(textField, BorderLayout.NORTH);
         topPanel.add(tasksScrollPane);
 
@@ -201,4 +197,47 @@ public class GUI extends JFrame {
         );
     }
 
+//   public void writeMethod(){
+//       FileOutputStream fileOS = null;
+//       try {
+//           fileOS = new FileOutputStream("q.xml");
+//       } catch (FileNotFoundException e) {
+//           e.printStackTrace();
+//       }
+//       XMLEncoder encoder=null;
+//       encoder=new XMLEncoder(fileOS);
+//       encoder.writeObject(list);
+//       encoder.close();
+//
+//   }
+//
+//   public void readMethod(){
+//       FileInputStream fileIS = null;
+//       try {
+//           File myFile = new File("q.xml");
+//           try {
+//               myFile.createNewFile();// if file already exists will do nothing
+//           } catch (IOException e) {
+//               e.printStackTrace();
+//           }
+//           FileOutputStream oFile = new FileOutputStream(myFile, false);
+//           fileIS = new FileInputStream(myFile);
+//       } catch (FileNotFoundException e) {
+//           e.printStackTrace();
+//       }
+//       if(fileIS!=null) {
+//           XMLDecoder decoder = new XMLDecoder(fileIS);
+//           List decodedSettings = (List) decoder.readObject();
+//           decoder.close();
+//           try {
+//               fileIS.close();
+//           } catch (IOException e) {
+//               e.printStackTrace();
+//           }
+//       }
+//       else
+//       {
+//
+//       }
+//   }
 }

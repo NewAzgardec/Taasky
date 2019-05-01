@@ -24,7 +24,8 @@ public class RusGUI extends JFrame {
     private String UPDATE = "Обновить тему";
     private String ADD = "Добавить";
     private String DELETE = "Удалить";
-    private String LABEL = " Вы можете вводить только цифры, русские буквы, и символ \".\"";
+    private String LABEL = "<html><p align=center> Вы можете вводить только цифры, русские буквы, и символ \".\"</p></html>";
+    private String SYMBOLS=" Длина строки должна быть от 3 до 20 символов!";
     private String TIP_UPDATE = "Нажмите, чтобы поменять тему";
     private String TIP_TEXTFIELD = "Введите название задачи";
     private String TIP_ADD = "Нажмите, чтобы добавить";
@@ -52,7 +53,7 @@ public class RusGUI extends JFrame {
     private Matcher matcher;
 
     private static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    private static int sizeWidth = 600;
+    private static int sizeWidth = 400;
     private static int sizeHeight = 400;
     private static int locationX = (screenSize.width - sizeWidth);
     private static int locationY = (screenSize.height - sizeHeight);
@@ -93,7 +94,6 @@ public class RusGUI extends JFrame {
 
         list = new JList<>();
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
         listScrollPane = new JScrollPane(list);
 
         topPanel = new JPanel();
@@ -121,6 +121,8 @@ public class RusGUI extends JFrame {
         textField = new JTextField();
         textField.setToolTipText(TIP_TEXTFIELD);
         tasksScrollPane = new JScrollPane(listBox);
+        DefaultListCellRenderer renderer =  (DefaultListCellRenderer)listBox.getCellRenderer();
+        renderer.setHorizontalAlignment(JLabel.CENTER);
 
 //        FileOutputStream out = null;
 //        try {
@@ -146,15 +148,20 @@ public class RusGUI extends JFrame {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                pattern = Pattern.compile("(([0-9]){0,}([а-яА-Я])([\\.]){0,})+");
+                pattern = Pattern.compile("(([0-9]){0,}([а-яА-Я]){0,}([ ])*([, ])*([\\.]){0,})+");
                 matcher = pattern.matcher(textField.getText());
-                if (!matcher.matches()) {
-                    label.setText(LABEL);
-                    textField.setText("");
+                if (textField.getText().length() <= 30 & textField.getText().length() >= 3) {
+                    if (!matcher.matches()) {
+                        label.setText(LABEL);
+                        textField.setText("");
+                    } else {
+                        names.add(names.getSize(), textField.getText());
+                        textField.setText("");
+                        label.setText("");
+                    }
                 } else {
-                    names.add(names.getSize(), textField.getText());
+                    label.setText(SYMBOLS);
                     textField.setText("");
-                    label.setText("");
                 }
             }
         });

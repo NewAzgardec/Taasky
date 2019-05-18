@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Set;
@@ -25,26 +26,13 @@ public class GUI extends JFrame {
     ClockThread ct;
 
     private String FRAME = "Taasky";
-    private String UPDATE = "Update Theme";
-    private String ADD = "Add";
-    private String DELETE = "Delete";
-    private String LABEL = "<html><p align=center> You can only enter numbers, english letters, and symbol \".\"</p></html>";
-    private String SYMBOLS = "<html><p align=center> The length of the string must be from 3 to 20 characters!</p></html>";
     private String TIP_UPDATE = "Click to change your theme";
     private String TIP_TEXTFIELD = "Enter task";
     private String TIP_ADD = "Click to add";
     private String TIP_DELETE = "Click to remove";
 
     private JFrame frame;
-    private JScrollPane listScrollPane;
-    private JPanel topPanel;
-    private JPanel btnPanel;
-    private JPanel bottomPanel;
-    private JScrollPane tasksScrollPane;
-    private JButton removeButton;
-    private JButton addButton;
-    private JPanel addRemovePanel;
-    private final JPanel panel;
+    private JMenuBar mb;
     private final JTextField textField;
     private final JLabel label;
 
@@ -57,7 +45,6 @@ public class GUI extends JFrame {
     private static int locationX = (screenSize.width - sizeWidth);
     private static int locationY = (screenSize.height - sizeHeight);
 
-    private final JList<String> list;
     private DefaultListModel<String> names = new DefaultListModel<>();
     private JList<String> listBox = new JList<>(names);
     private int[] arr;
@@ -65,33 +52,24 @@ public class GUI extends JFrame {
     private static final String RB_NAME = "config.main";
     private static final String PROP_LANGS = "langs";
     private static final String PROP_LANGS_DEFAULT = "lang.default";
-    private static final String TITLE_KEY = "title";
+   // private static final String TITLE_KEY = "title";
 
-    JMenuBar mb;
+    private MyLocale myLocale = new MyLocale(RB_NAME);
 
-    MyLocale myLocale = new MyLocale(RB_NAME);
-
-    File file = new File("config/langs.properties");
-
-    public GUI() {
+    private GUI() {
         super();
-        System.out.println(file.getAbsolutePath());
-        System.out.println("");
         InputStream input = null;
-        InputStreamReader inR = null;
+        InputStreamReader inputStreamReader = null;
         try {
             input = new FileInputStream("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\langs.properties");
-            try {
-                inR = new InputStreamReader(input, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            inputStreamReader = new InputStreamReader(input, StandardCharsets.UTF_8);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         Properties props = System.getProperties();
         try {
-            props.load(inR);
+            assert inputStreamReader != null;
+            props.load(inputStreamReader);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,16 +83,16 @@ public class GUI extends JFrame {
         jLabelClock = new JLabel();
         jLabelClock.setFont(new Font("Comin Sans MS", Font.BOLD, 16));
         add(jLabelClock);
-        ct = new ClockThread(this);
+        ct = new ClockThread(GUI.this);
         jLabelClock.setHorizontalAlignment(SwingConstants.CENTER);
         jLabelClock.setVerticalAlignment(SwingConstants.CENTER);
 
-        list = new JList<>();
+        JList<String> list = new JList<>();
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        listScrollPane = new JScrollPane(list);
+        JScrollPane listScrollPane = new JScrollPane(list);
 
-        topPanel = new JPanel();
+        JPanel topPanel = new JPanel();
         topPanel.setLayout(new BorderLayout());
         topPanel.add(listScrollPane, BorderLayout.WEST);
 
@@ -127,12 +105,13 @@ public class GUI extends JFrame {
         updateLookAndFeelButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.updateLookAndFeelButton");
 
         updateLookAndFeelButton.setToolTipText(TIP_UPDATE);
-        btnPanel = new JPanel();
+
+        JPanel btnPanel = new JPanel();
         btnPanel.add(updateLookAndFeelButton);
-        bottomPanel = new JPanel();
+        JPanel bottomPanel = new JPanel();
         bottomPanel.add(btnPanel);
 
-        panel = new JPanel();
+        JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         panel.setLayout(new BorderLayout());
         panel.add(topPanel, BorderLayout.CENTER);
@@ -145,15 +124,17 @@ public class GUI extends JFrame {
             public void keyPressed(KeyEvent e) {
                 if (textField.getText().length() >= 3 & textField.getText().length() <= 30) {
                     label.setText("");
-                } else label.setText(SYMBOLS);
+                } else
+                    label.setText(myLocale.getStringResource("lbl.symbols"));
             }
         });
 
-        tasksScrollPane = new JScrollPane(listBox);
+        JScrollPane tasksScrollPane = new JScrollPane(listBox);
         DefaultListCellRenderer renderer = (DefaultListCellRenderer) listBox.getCellRenderer();
         renderer.setHorizontalAlignment(JLabel.CENTER);
 
-        addButton = new JButton(ADD);
+        JButton addButton = new JButton();
+        addButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.add");
         addButton.setToolTipText(TIP_ADD);
 
         label = new JLabel();
@@ -168,7 +149,7 @@ public class GUI extends JFrame {
 
             if (textField.getText().length() <= 30 & textField.getText().length() >= 3) {
                 if (!matcher.matches()) {
-                    label.setText(LABEL);
+                    label.setText(myLocale.getStringResource("lbl.label"));
                     textField.setText("");
                 } else {
                     names.add(names.getSize(), textField.getText());
@@ -178,8 +159,8 @@ public class GUI extends JFrame {
             }
         });
 
-        removeButton = new JButton();
-        removeButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.ok");
+        JButton removeButton = new JButton();
+        removeButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.delete");
 
         removeButton.setToolTipText(TIP_DELETE);
         removeButton.addActionListener(e -> {
@@ -190,9 +171,7 @@ public class GUI extends JFrame {
         });
 
 
-
-
-        addRemovePanel = new JPanel();
+        JPanel addRemovePanel = new JPanel();
         addRemovePanel.setLayout(new BoxLayout(addRemovePanel, BoxLayout.LINE_AXIS));
         btnPanel.add(addButton);
         btnPanel.add(Box.createHorizontalStrut(5));
@@ -201,7 +180,10 @@ public class GUI extends JFrame {
         topPanel.add(textField, BorderLayout.NORTH);
         topPanel.add(tasksScrollPane);
 
+        Image icon = new ImageIcon("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\icon1.png").getImage();
+
         frame = new JFrame(FRAME);
+        frame.setIconImage(icon);
         frame.setBounds(locationX, locationY, sizeWidth, sizeHeight);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(panel);
@@ -212,17 +194,19 @@ public class GUI extends JFrame {
         frame.setVisible(true);
         frame.setResizable(false);
 
+
         updateLookAndFeelButton.addActionListener(
                 new UpdateLookAndFeelAction(frame, list)
         );
 
 
-
         applyLocale(defaultLang);
+
     }
-    private void applyLocale(String locale){
+
+    private void applyLocale(String locale) {
         myLocale.setLocale(locale);
-        myLocale.changeLocale(getContentPane());
+        myLocale.changeLocale(frame);
         myLocale.changeLocale(getJMenuBar());
         //setTitle(myLocale.getStringResource(TITLE_KEY));
     }
@@ -299,7 +283,8 @@ public class GUI extends JFrame {
             miLang.addActionListener(e -> applyLocale(lang));
         }
     }
-    public static void main(String [] args){
+
+    public static void main(String[] args) {
         new GUI();
     }
 }

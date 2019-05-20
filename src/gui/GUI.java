@@ -16,8 +16,9 @@ import java.util.regex.Pattern;
 
 public class GUI extends JFrame {
 
-    private static final String DATA_FILE=("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\data.txt");
-    private static final String IMAGE_PATH=("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\icon1.png");
+    private static final String DATA_FILE = ("data.txt");
+    private static final String IMAGE_PATH = ("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\icon1.png");
+    private static final String INPUT_S = ("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\langs.properties");
 
     private String TIP_UPDATE = "Click to change your theme";
     private String TIP_TEXTFIELD = "Enter task";
@@ -26,6 +27,8 @@ public class GUI extends JFrame {
     private String TIP_EDIT = "Click to edit";
     private String defaultLang;
     private Set<String> langSet;
+
+    private String LIST_OF_SYMBOLS = ("(([0-9]){0,}([a-zа-яA-ZА-Я]){0,}([ ])*([, ])*([\\.]){0,})+");
 
     public JLabel jLabelClock;
     private JFrame frame;
@@ -91,7 +94,7 @@ public class GUI extends JFrame {
         textField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (textField.getText().length() >= 3 & textField.getText().length() <= 30) {
+                if (textField.getText().length() > 1 & textField.getText().length() < 30) {
                     label.setText("");
                 } else
                     label.setText(myLocale.getStringResource("lbl.symbols"));
@@ -165,7 +168,7 @@ public class GUI extends JFrame {
         InputStream input;
         InputStreamReader inputStreamReader = null;
         try {
-            input = new FileInputStream("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\langs.properties");
+            input = new FileInputStream(INPUT_S);
             inputStreamReader = new InputStreamReader(input, StandardCharsets.UTF_8);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -195,7 +198,9 @@ public class GUI extends JFrame {
         JMenuItem miExit = new JMenuItem();
         miExit.putClientProperty(MyLocale.LOCALIZATION_KEY, "menu.file.exit");
         mFile.add(miExit);
-        miExit.addActionListener(e -> {writeTask();System.exit(0);
+        miExit.addActionListener(e -> {
+            writeTask();
+            System.exit(0);
         });
 
         ButtonGroup buttonGroup = new ButtonGroup();
@@ -211,21 +216,21 @@ public class GUI extends JFrame {
         }
     }
 
-    private void writeTask(){
-        try{
+    private void writeTask() {
+        try {
             OutputStream f = new FileOutputStream(DATA_FILE, false);
             OutputStreamWriter writer = new OutputStreamWriter(f);
             BufferedWriter out = new BufferedWriter(writer);
-            for(int i = 0; i < names.size(); i++)
-            {
-                out.write(names.get(i)+"\n");
+            for (int i = 0; i < names.size(); i++) {
+                out.write(names.get(i) + "\n");
                 out.flush();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    private void readTask(){
+
+    private void readTask() {
 
         try (BufferedReader BR = new BufferedReader(new FileReader(new File(DATA_FILE)))) {
             String item;
@@ -233,8 +238,7 @@ public class GUI extends JFrame {
                 names.addElement(item);
             }
             listBox.setModel(names);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -244,7 +248,7 @@ public class GUI extends JFrame {
         addButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.add");
         addButton.setToolTipText(TIP_ADD);
         addButton.addActionListener(e -> {
-            pattern = Pattern.compile("(([0-9]){0,}([a-zа-яA-ZА-Я]){0,}([ ])*([, ])*([\\.]){0,})+");
+            pattern = Pattern.compile(LIST_OF_SYMBOLS);
             matcher = pattern.matcher(textField.getText());
 
             if (textField.getText().length() <= 30 & textField.getText().length() >= 3) {

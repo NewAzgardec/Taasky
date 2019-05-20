@@ -7,10 +7,7 @@ import threads.ClockThread;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -25,6 +22,7 @@ public class GUI extends JFrame {
     private String TIP_TEXTFIELD = "Enter task";
     private String TIP_ADD = "Click to add";
     private String TIP_DELETE = "Click to remove";
+    private String TIP_EDIT = "Click to edit";
     private String langsProp;
     private String defaultLang;
     private Set<String> langSet;
@@ -40,9 +38,10 @@ public class GUI extends JFrame {
 
     private Pattern pattern;
     private Matcher matcher;
+    private Matcher matcherEdit;
 
     private static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    private static int sizeWidth = 400;
+    private static int sizeWidth = 600;
     private static int sizeHeight = 400;
     private static int locationX = (screenSize.width - sizeWidth);
     private static int locationY = (screenSize.height - sizeHeight);
@@ -103,7 +102,7 @@ public class GUI extends JFrame {
         DefaultListCellRenderer renderer = (DefaultListCellRenderer) listBox.getCellRenderer();
         renderer.setHorizontalAlignment(JLabel.CENTER);
 
-        addRemove();
+        addRemoveEdit();
 
         label = new JLabel();
         label.setForeground(Color.red);
@@ -201,7 +200,7 @@ public class GUI extends JFrame {
         }
     }
 
-    private void addRemove() {
+    private void addRemoveEdit() {
         JButton addButton = new JButton();
         addButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.add");
         addButton.setToolTipText(TIP_ADD);
@@ -231,10 +230,36 @@ public class GUI extends JFrame {
             }
         });
 
+        JButton editButton = new JButton();
+        editButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.edit");
+        editButton.setToolTipText(TIP_EDIT);
+        if (listBox.isSelectionEmpty()) {
+            editButton.addActionListener(e -> {
+                String current = listBox.getSelectedValue();
+                int index = listBox.getSelectedIndex();
+                String message = myLocale.getStringResource("str.new");
+                String wrongSymbols = myLocale.getStringResource("str.wrong");
+                String wrongLength = myLocale.getStringResource("lbl.symbols");
+                String result = JOptionPane.showInputDialog(this, message);
+                matcherEdit = pattern.matcher(result);
+                if (result.length() <= 30 & result.length() >= 3) {
+                    if (!matcherEdit.matches()) {
+                        JOptionPane.showMessageDialog(this, wrongSymbols);
+                    } else {
+                        names.removeElement(current);
+                        names.add(index, result);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, wrongLength);
+                }
+            });
+        }
+
         addRemovePanel = new JPanel();
         addRemovePanel.add(updateLookAndFeelButton);
         addRemovePanel.add(addButton);
         addRemovePanel.add(removeButton);
+        addRemovePanel.add(editButton);
     }
 
     public static void main(String[] args) {

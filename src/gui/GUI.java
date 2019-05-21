@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 public class GUI extends JFrame {
 
     private static final String DATA_FILE = ("data.txt");
+    private static final String HISTORY = ("history.txt");
+
     private static final String IMAGE_PATH = ("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\icon1.png");
     private static final String INPUT_S = ("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\langs.properties");
 
@@ -25,8 +27,8 @@ public class GUI extends JFrame {
     private String TIP_ADD = "Click to add";
     private String TIP_DELETE = "Click to remove";
     private String TIP_EDIT = "Click to edit";
-    private String defaultLang;
-    private Set<String> langSet;
+    private static String defaultLang;
+    private static Set<String> langSet;
 
     private String LIST_OF_SYMBOLS = ("(([0-9]){0,}([a-zа-яA-ZА-Я]){0,}([ ])*([, ])*([\\.]){0,})+");
 
@@ -35,7 +37,7 @@ public class GUI extends JFrame {
     private JMenuBar menu;
     private final JTextField textField;
     private final JLabel label;
-    private Properties props;
+    private static Properties props;
     private JPanel addRemovePanel;
     private JButton updateLookAndFeelButton;
 
@@ -56,6 +58,7 @@ public class GUI extends JFrame {
     private static final String RB_NAME = "config.main";
     private static final String PROP_LANGS = "langs";
     private static final String PROP_LANGS_DEFAULT = "lang.default";
+    String st;
 
     private MyLocale myLocale = new MyLocale(RB_NAME);
 
@@ -164,7 +167,7 @@ public class GUI extends JFrame {
         jLabelClock.setVerticalAlignment(SwingConstants.CENTER);
     }
 
-    private void getLangsProperties() {
+    public static void getLangsProperties() {
         InputStream input;
         InputStreamReader inputStreamReader = null;
         try {
@@ -192,8 +195,20 @@ public class GUI extends JFrame {
         mFile.putClientProperty(MyLocale.LOCALIZATION_KEY, "menu.file");
         JMenu mLang = new JMenu();
         mLang.putClientProperty(MyLocale.LOCALIZATION_KEY, "menu.language");
+        JMenu mHistory = new JMenu();
+        mHistory.putClientProperty(MyLocale.LOCALIZATION_KEY, "menu.history");
+        JMenuItem hi = new JMenuItem();
+        hi.putClientProperty(MyLocale.LOCALIZATION_KEY, "menu.history.deleted");
+        mHistory.add(hi);
+
+        hi.addActionListener(e -> {
+            writeTask();
+            new History();
+        });
+
         menu.add(mFile);
         menu.add(mLang);
+        menu.add(mHistory);
 
         JMenuItem miExit = new JMenuItem();
         miExit.putClientProperty(MyLocale.LOCALIZATION_KEY, "menu.file.exit");
@@ -225,6 +240,18 @@ public class GUI extends JFrame {
                 out.write(names.get(i) + "\n");
                 out.flush();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeHistory() {
+        try {
+            OutputStream f = new FileOutputStream(HISTORY, false);
+            OutputStreamWriter writer = new OutputStreamWriter(f);
+            BufferedWriter out = new BufferedWriter(writer);
+            out.write(st + "\n");
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -269,7 +296,11 @@ public class GUI extends JFrame {
         removeButton.addActionListener(e -> {
             arr = listBox.getSelectedIndices();
             for (int i1 : arr) {
+
+                st = names.get(i1);
+                System.out.println(st);
                 names.remove(i1);
+                writeHistory();
             }
         });
 

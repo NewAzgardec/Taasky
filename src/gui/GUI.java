@@ -4,6 +4,8 @@ import localization.MyLocale;
 import themes.UpdateListAction;
 import themes.UpdateLookAndFeelAction;
 import threads.ClockThread;
+import other.Limit;
+import other.XMLHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,12 +13,12 @@ import java.awt.event.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GUI extends JFrame {
 
-    private static final String DATA_FILE = ("data.txt");
     private static final String HISTORY = ("history.txt");
 
     private static final String IMAGE_PATH = ("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\icon1.png");
@@ -40,10 +42,10 @@ public class GUI extends JFrame {
     private static Properties props;
     private JPanel addRemovePanel;
     private JButton updateLookAndFeelButton;
+    private JComboBox comboBox;
 
     private Pattern pattern;
     private Matcher matcher;
-    private Matcher matcherEdit;
 
     private static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     private static int sizeWidth = 600;
@@ -51,14 +53,16 @@ public class GUI extends JFrame {
     private static int locationX = (screenSize.width - sizeWidth);
     private static int locationY = (screenSize.height - sizeHeight);
 
-    private DefaultListModel<String> names = new DefaultListModel<>();
-    private JList<String> listBox = new JList<>(names);
+    private DefaultListModel<MyItem> names = new DefaultListModel<>();
+    private JList<MyItem> listBox = new JList<>(names);
     private int[] arr;
 
     private static final String RB_NAME = "config.main";
     private static final String PROP_LANGS = "langs";
     private static final String PROP_LANGS_DEFAULT = "lang.default";
-    String st;
+    private String namesDescription;
+
+    private Color col;
 
     private MyLocale myLocale = new MyLocale(RB_NAME);
 
@@ -69,6 +73,14 @@ public class GUI extends JFrame {
         getLangsProperties();
         createMenuBar(langSet, defaultLang);
         myTime();
+
+        String[] items = {
+                "Важно|Срочно",
+                "Важно|Не срочно",
+                "Не важно|Срочно",
+                "Не важно|Не срочно"
+
+        };
 
         JList<String> list = new JList<>();
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -93,6 +105,7 @@ public class GUI extends JFrame {
         panel.add(topPanel, BorderLayout.CENTER);
 
         textField = new JTextField();
+        textField.setDocument(new Limit(30));
         textField.setToolTipText(TIP_TEXTFIELD);
         textField.addKeyListener(new KeyAdapter() {
             @Override
@@ -117,9 +130,16 @@ public class GUI extends JFrame {
         label.setHorizontalAlignment(SwingConstants.CENTER);
         label.setVerticalAlignment(SwingConstants.CENTER);
 
+
+        comboBox = new JComboBox(items);
+        textField.setPreferredSize(new Dimension(300, 25));
+        JPanel demo = new JPanel();
+        demo.add(textField, BorderLayout.NORTH);
+        demo.add(comboBox, BorderLayout.SOUTH);
+
         panel.add(addRemovePanel, BorderLayout.SOUTH);
-        topPanel.add(textField, BorderLayout.NORTH);
-        topPanel.add(tasksScrollPane);
+        topPanel.add(tasksScrollPane, BorderLayout.CENTER);
+        topPanel.add(demo, BorderLayout.NORTH);
 
         Image icon = new ImageIcon(IMAGE_PATH).getImage();
 
@@ -150,6 +170,12 @@ public class GUI extends JFrame {
         );
 
         applyLocale(defaultLang);
+
+        listBox.addListSelectionListener(e -> {
+            if (!listBox.isSelectionEmpty()) {
+                listBox.setSelectionBackground(listBox.getSelectedValue().getStatus());
+            }
+        });
     }
 
     private void applyLocale(String locale) {
@@ -232,25 +258,19 @@ public class GUI extends JFrame {
     }
 
     private void writeTask() {
-        try {
-            OutputStream f = new FileOutputStream(DATA_FILE, false);
-            OutputStreamWriter writer = new OutputStreamWriter(f);
-            BufferedWriter out = new BufferedWriter(writer);
-            for (int i = 0; i < names.size(); i++) {
-                out.write(names.get(i) + "\n");
-                out.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        List<MyItem> myItems = new ArrayList<>();
+        for (int i = 0; i < names.size(); i++) {
+            myItems.add(names.get(i));
         }
+        XMLHelper.writeToXML(myItems);
     }
 
     private void writeHistory() {
         try {
-            OutputStream f = new FileOutputStream(HISTORY, false);
+            OutputStream f = new FileOutputStream(HISTORY, true);
             OutputStreamWriter writer = new OutputStreamWriter(f);
             BufferedWriter out = new BufferedWriter(writer);
-            out.write(st + "\n");
+            out.write(namesDescription + "\n");
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -259,15 +279,13 @@ public class GUI extends JFrame {
 
     private void readTask() {
 
-        try (BufferedReader BR = new BufferedReader(new FileReader(new File(DATA_FILE)))) {
-            String item;
-            while ((item = BR.readLine()) != null) {
-                names.addElement(item);
+        List<MyItem> myItems = (List<MyItem>) XMLHelper.readFromXML();
+        if (myItems != null) {
+            for (int i = 0; i < myItems.size(); i++) {
+                names.add(i, myItems.get(i));
             }
-            listBox.setModel(names);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        listBox.setModel(names);
     }
 
     private void addRemoveEdit() {
@@ -277,18 +295,35 @@ public class GUI extends JFrame {
         addButton.addActionListener(e -> {
             pattern = Pattern.compile(LIST_OF_SYMBOLS);
             matcher = pattern.matcher(textField.getText());
+            int color = comboBox.getSelectedIndex();
+            col = Color.white;
+            switch (color) {
+                case 0:
+                    col = Color.red;
+                    break;
+                case 1:
+                    col = Color.orange;
+                    break;
+                case 2:
+                    col = Color.yellow;
+                    break;
+                case 3:
+                    col = Color.green;
+                    break;
+            }
 
             if (textField.getText().length() <= 30 & textField.getText().length() >= 3) {
                 if (!matcher.matches()) {
                     label.setText(myLocale.getStringResource("lbl.label"));
                     textField.setText("");
                 } else {
-                    names.add(names.getSize(), textField.getText());
+                    names.add(names.getSize(), new MyItem(textField.getText(), col));
                     textField.setText("");
                     label.setText("");
                 }
             }
         });
+
 
         JButton removeButton = new JButton();
         removeButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.delete");
@@ -296,9 +331,7 @@ public class GUI extends JFrame {
         removeButton.addActionListener(e -> {
             arr = listBox.getSelectedIndices();
             for (int i1 : arr) {
-
-                st = names.get(i1);
-                System.out.println(st);
+                namesDescription = names.get(i1).getDescription();
                 names.remove(i1);
                 writeHistory();
             }
@@ -309,26 +342,11 @@ public class GUI extends JFrame {
         editButton.setToolTipText(TIP_EDIT);
         if (listBox.isSelectionEmpty()) {
             editButton.addActionListener(e -> {
-                String current = listBox.getSelectedValue();
                 int index = listBox.getSelectedIndex();
-                String message = myLocale.getStringResource("str.new");
-                String wrongSymbols = myLocale.getStringResource("str.wrong");
-                String wrongLength = myLocale.getStringResource("lbl.symbols");
-                String result = JOptionPane.showInputDialog(this, message);
-                matcherEdit = pattern.matcher(result);
-                if (result.length() <= 30 & result.length() >= 3) {
-                    if (!matcherEdit.matches()) {
-                        JOptionPane.showMessageDialog(this, wrongSymbols);
-                    } else {
-                        names.removeElement(current);
-                        names.add(index, result);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this, wrongLength);
-                }
+                textField.setText(listBox.getSelectedValue().getDescription());
+                names.removeElementAt(index);
             });
         }
-
         addRemovePanel = new JPanel();
         addRemovePanel.add(updateLookAndFeelButton);
         addRemovePanel.add(addButton);

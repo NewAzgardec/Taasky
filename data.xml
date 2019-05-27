@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="11.0.1" class="java.beans.XMLDecoder">
+ <object class="java.util.ArrayList">
+  <void method="add">
+   <object class="gui.MyItem">
+    <void property="description">
+     <string>5y35y5y3y</string>
+    </void>
+    <void property="status">
+     <object class="java.awt.Color">
+      <int>255</int>
+      <int>0</int>
+      <int>0</int>
+      <int>255</int>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="gui.MyItem">
+    <void property="description">
+     <string>y5tyh4thyrth</string>
+    </void>
+    <void property="status">
+     <object class="java.awt.Color">
+      <int>255</int>
+      <int>200</int>
+      <int>0</int>
+      <int>255</int>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="gui.MyItem">
+    <void property="description">
+     <string>1323456767</string>
+    </void>
+    <void property="status">
+     <object class="java.awt.Color">
+      <int>255</int>
+      <int>255</int>
+      <int>0</int>
+      <int>255</int>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="gui.MyItem">
+    <void property="description">
+     <string>hhhhh</string>
+    </void>
+    <void property="status">
+     <object class="java.awt.Color">
+      <int>255</int>
+      <int>255</int>
+      <int>0</int>
+      <int>255</int>
+     </object>
+    </void>
+   </object>
+  </void>
+ </object>
+</java>

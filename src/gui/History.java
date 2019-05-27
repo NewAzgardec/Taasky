@@ -18,8 +18,8 @@ class History extends JFrame {
     private static int locationX = (screenSize.width - sizeWidth);
     private static int locationY = (screenSize.height - sizeHeight);
 
-    private DefaultListModel<String> hist = new DefaultListModel<>();
-    private JList<String> listBox = new JList<>(hist);
+    private DefaultListModel<MyItem> hist = new DefaultListModel<>();
+    private JList<MyItem> listBox = new JList<>(hist);
     private int[] arr;
 
     History() {
@@ -74,7 +74,7 @@ class History extends JFrame {
         try (BufferedReader BR = new BufferedReader(new FileReader(new File(HISTORY)))) {
             String item;
             while ((item = BR.readLine()) != null) {
-                hist.addElement(item);
+                hist.addElement(new MyItem(item, null));
             }
             listBox.setModel(hist);
         } catch (IOException e) {

@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 public class GUI extends JFrame {
 
     private static final String HISTORY = ("history.txt");
+    private static final String FAVORITE = ("favorite.txt");
 
     private static final String IMAGE_PATH = ("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\icon1.png");
     private static final String INPUT_S = ("C:\\Users\\Masha\\IntelliJIDEAProjects\\AipLaba\\src\\config\\langs.properties");
@@ -29,6 +30,10 @@ public class GUI extends JFrame {
     private String TIP_ADD = "Click to add";
     private String TIP_DELETE = "Click to remove";
     private String TIP_EDIT = "Click to edit";
+    private String TIP_FAV_ADD = "Click to add ♥";
+    private String TIP_FAV_DELETE = "Click to remove ♥";
+    private String TIP_FAV_SET = "Click to choose ♥";
+
     private static String defaultLang;
     private static Set<String> langSet;
 
@@ -43,19 +48,27 @@ public class GUI extends JFrame {
     private JPanel addRemovePanel;
     private JButton updateLookAndFeelButton;
     private JComboBox comboBox;
+    private JButton addFavorite;
+    private JButton deleteFavorite;
+    private JButton setFavorite;
 
     private Pattern pattern;
     private Matcher matcher;
 
     private static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    private static int sizeWidth = 600;
-    private static int sizeHeight = 400;
+    private static int sizeWidth = 700;
+    private static int sizeHeight = 500;
     private static int locationX = (screenSize.width - sizeWidth);
     private static int locationY = (screenSize.height - sizeHeight);
 
     private DefaultListModel<MyItem> names = new DefaultListModel<>();
     private JList<MyItem> listBox = new JList<>(names);
+
+    private DefaultListModel<String> fav = new DefaultListModel<>();
+    private JList<String> favorite = new JList<>(fav);
+
     private int[] arr;
+    private int[] arr2;
 
     private static final String RB_NAME = "config.main";
     private static final String PROP_LANGS = "langs";
@@ -118,11 +131,13 @@ public class GUI extends JFrame {
         });
 
         JScrollPane tasksScrollPane = new JScrollPane(listBox);
+        JScrollPane favoriteTasks = new JScrollPane(favorite);
+        favoriteTasks.setPreferredSize(new Dimension(150, 0));
+        favorite.setBackground(new Color(223, 220, 225));
         readTask();
-        DefaultListCellRenderer renderer = (DefaultListCellRenderer) listBox.getCellRenderer();
-        renderer.setHorizontalAlignment(JLabel.CENTER);
+        readFavorite();
 
-        addRemoveEdit();
+        myButtons();
 
         label = new JLabel();
         label.setForeground(Color.red);
@@ -139,6 +154,7 @@ public class GUI extends JFrame {
 
         panel.add(addRemovePanel, BorderLayout.SOUTH);
         topPanel.add(tasksScrollPane, BorderLayout.CENTER);
+        topPanel.add(favoriteTasks, BorderLayout.EAST);
         topPanel.add(demo, BorderLayout.NORTH);
 
         Image icon = new ImageIcon(IMAGE_PATH).getImage();
@@ -160,6 +176,7 @@ public class GUI extends JFrame {
             @Override
             public void windowClosing(WindowEvent w) {
                 writeTask();
+                writeFavorite();
                 System.exit(0);
             }
         };
@@ -229,6 +246,7 @@ public class GUI extends JFrame {
 
         hi.addActionListener(e -> {
             writeTask();
+            writeFavorite();
             new History();
         });
 
@@ -241,6 +259,7 @@ public class GUI extends JFrame {
         mFile.add(miExit);
         miExit.addActionListener(e -> {
             writeTask();
+            writeFavorite();
             System.exit(0);
         });
 
@@ -277,8 +296,21 @@ public class GUI extends JFrame {
         }
     }
 
-    private void readTask() {
+    private void writeFavorite() {
+        try {
+            OutputStream f2 = new FileOutputStream(FAVORITE, false);
+            OutputStreamWriter writer2 = new OutputStreamWriter(f2);
+            BufferedWriter out2 = new BufferedWriter(writer2);
+            for (int i = 0; i < fav.size(); i++) {
+                out2.write(fav.get(i) + "\n");
+                out2.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void readTask() {
         List<MyItem> myItems = (List<MyItem>) XMLHelper.readFromXML();
         if (myItems != null) {
             for (int i = 0; i < myItems.size(); i++) {
@@ -288,7 +320,19 @@ public class GUI extends JFrame {
         listBox.setModel(names);
     }
 
-    private void addRemoveEdit() {
+    private void readFavorite() {
+        try (BufferedReader BR = new BufferedReader(new FileReader(FAVORITE))) {
+            String item;
+            while ((item = BR.readLine()) != null) {
+                fav.addElement(item);
+            }
+            favorite.setModel(fav);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void myButtons() {
         JButton addButton = new JButton();
         addButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.add");
         addButton.setToolTipText(TIP_ADD);
@@ -324,7 +368,6 @@ public class GUI extends JFrame {
             }
         });
 
-
         JButton removeButton = new JButton();
         removeButton.putClientProperty(MyLocale.LOCALIZATION_KEY, "btn.delete");
         removeButton.setToolTipText(TIP_DELETE);
@@ -346,12 +389,52 @@ public class GUI extends JFrame {
                 textField.setText(listBox.getSelectedValue().getDescription());
                 names.removeElementAt(index);
             });
+
+            addFavorite = new JButton();
+            addFavorite.setText("+");
+            addFavorite.setToolTipText(TIP_FAV_ADD);
+            addFavorite.addActionListener(e -> {
+                pattern = Pattern.compile(LIST_OF_SYMBOLS);
+                matcher = pattern.matcher(textField.getText());
+                if (textField.getText().length() <= 30 & textField.getText().length() >= 3) {
+                    if (!matcher.matches()) {
+                        label.setText(myLocale.getStringResource("lbl.label"));
+                        textField.setText("");
+                    } else {
+                        fav.add(fav.getSize(), textField.getText());
+                        textField.setText("");
+                        label.setText("");
+                    }
+                }
+            });
+
+            deleteFavorite = new JButton();
+            deleteFavorite.setText("-");
+            deleteFavorite.setToolTipText(TIP_FAV_DELETE);
+            deleteFavorite.addActionListener(e -> {
+                arr2 = favorite.getSelectedIndices();
+                for (int i1 : arr2) {
+                    fav.remove(i1);
+                }
+            });
+
+            setFavorite = new JButton();
+            setFavorite.setText("√");
+            setFavorite.setToolTipText(TIP_FAV_SET);
+            setFavorite.addActionListener(e -> {
+                textField.setText(favorite.getSelectedValue());
+            });
         }
+
         addRemovePanel = new JPanel();
         addRemovePanel.add(updateLookAndFeelButton);
         addRemovePanel.add(addButton);
         addRemovePanel.add(removeButton);
         addRemovePanel.add(editButton);
+        addRemovePanel.add(addFavorite);
+        addRemovePanel.add(deleteFavorite);
+        addRemovePanel.add(setFavorite);
+
     }
 
     public static void main(String[] args) {

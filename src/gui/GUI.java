@@ -1,13 +1,10 @@
 package gui;
 
 import localization.MyLocale;
-import other.MyDate;
-import other.MyItem;
+import other.*;
 import themes.UpdateListAction;
 import themes.UpdateLookAndFeelAction;
 import threads.ClockThread;
-import other.Limit;
-import other.XMLHelper;
 
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
@@ -16,6 +13,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
@@ -145,7 +143,6 @@ public class GUI extends JFrame {
             e.printStackTrace();
         }
         fieldForDate.setPreferredSize(new Dimension(68, 25));
-
 
         JPanel demo = new JPanel();
         demo.add(textField, BorderLayout.WEST);
@@ -359,24 +356,29 @@ public class GUI extends JFrame {
 
             long curTime = System.currentTimeMillis();
             Date curDate = new Date(curTime);
-
-            if (curDate.before(MyDate.stringToDate(date)) | MyDate.dateToString(curDate).equals(date)) {
-                if (textField.getText().length() <= 30 & textField.getText().length() >= 3) {
-                    if (!matcher.matches()) {
-                        label.setText(myLocale.getStringResource("lbl.label"));
-                        fieldForDate.setText("");
-                        textField.setText("");
-                    } else {
-                        MyItem item = new MyItem(textField.getText(), col, MyDate.stringToDate(date));
-                        names.add(names.getSize(), item);
-                        deadTask();
-                        textField.setText("");
-                        label.setText("");
-                        fieldForDate.setText("");
+            try {
+                if (curDate.before(MyDate.stringToDate(date)) | MyDate.dateToString(curDate).equals(date)) {
+                    if (textField.getText().length() <= 30 & textField.getText().length() >= 3) {
+                        if (!matcher.matches()) {
+                            label.setText(myLocale.getStringResource("lbl.label"));
+                            fieldForDate.setText("");
+                            textField.setText("");
+                        } else {
+                            MyItem item = new MyItem(textField.getText(), col, MyDate.stringToDate(date));
+                            names.add(names.getSize(), item);
+                            deadTask();
+                            textField.setText("");
+                            label.setText("");
+                            fieldForDate.setText("");
+                        }
                     }
+                } else {
+                    label.setText(myLocale.getStringResource("lbl.wrong.date"));
                 }
-            } else {
+            } catch (DateTimeParseException ex) {
+                fieldForDate.setText("");
                 label.setText(myLocale.getStringResource("lbl.wrong.date"));
+                logger.info("user not fully entered date");
             }
         });
 

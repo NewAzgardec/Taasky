@@ -48,7 +48,6 @@ public class GUI extends JFrame {
     private JButton addFavorite;
     private JButton deleteFavorite;
     private JButton setFavorite;
-    private ClockThread ct;
 
     private Pattern pattern;
     private Matcher matcher;
@@ -206,7 +205,7 @@ public class GUI extends JFrame {
         jLabelClock = new JLabel();
         jLabelClock.setFont(new Font("Comin Sans MS", Font.BOLD, 16));
         add(jLabelClock);
-        ct = new ClockThread(GUI.this);
+        ClockThread ct = new ClockThread(GUI.this);
         jLabelClock.setHorizontalAlignment(SwingConstants.CENTER);
         jLabelClock.setVerticalAlignment(SwingConstants.CENTER);
     }
@@ -361,10 +360,11 @@ public class GUI extends JFrame {
             long curTime = System.currentTimeMillis();
             Date curDate = new Date(curTime);
 
-            if (curDate.before(MyDate.stringToDate(date)) | curDate.compareTo(MyDate.stringToDate(date)) > 0) {
+            if (curDate.before(MyDate.stringToDate(date)) | MyDate.dateToString(curDate).equals(date)) {
                 if (textField.getText().length() <= 30 & textField.getText().length() >= 3) {
                     if (!matcher.matches()) {
                         label.setText(myLocale.getStringResource("lbl.label"));
+                        fieldForDate.setText("");
                         textField.setText("");
                     } else {
                         MyItem item = new MyItem(textField.getText(), col, MyDate.stringToDate(date));
@@ -448,10 +448,6 @@ public class GUI extends JFrame {
         for (int i = 0; i < names.size(); i++) {
             long curTime = System.currentTimeMillis();
             Date curDate = new Date(curTime);
-
-
-            System.out.println(MyDate.dateToString(curDate));
-            System.out.println(MyDate.dateToString(names.get(i).getTime()));
 
             if (MyDate.dateToString(curDate).equals(MyDate.dateToString(names.get(i).getTime()))) {
                 if (names.get(i).getDescription().contains("   TODAY")) {

@@ -16,7 +16,6 @@ import java.awt.event.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
@@ -125,9 +124,8 @@ public class GUI extends JFrame {
         favoriteTasks.setPreferredSize(new Dimension(150, 0));
         favorite.setBackground(new Color(223, 220, 225));
         readTask();
-        // deadTask();
         readFavorite();
-
+        deadTask();
         myButtons();
 
         label = new JLabel();
@@ -136,9 +134,9 @@ public class GUI extends JFrame {
         label.setHorizontalAlignment(SwingConstants.CENTER);
         label.setVerticalAlignment(SwingConstants.CENTER);
 
-        String[] items = {"Важно|Срочно", "Важно|Не срочно", "Не важно|Срочно", "Не важно|Не срочно"};
-
+        String[] items = {"★ ★ ★ ★", "★ ★ ★", "★ ★", "★"};
         comboBox = new JComboBox(items);
+
         textField.setPreferredSize(new Dimension(250, 25));
         try {
             MaskFormatter maskFormatter = new MaskFormatter("##.##.####");
@@ -400,6 +398,7 @@ public class GUI extends JFrame {
             editButton.addActionListener(e -> {
                 int index = listBox.getSelectedIndex();
                 textField.setText(listBox.getSelectedValue().getDescription());
+                fieldForDate.setText(MyDate.dateToString(listBox.getSelectedValue().getTime()));
                 names.removeElementAt(index);
             });
 
@@ -450,15 +449,30 @@ public class GUI extends JFrame {
             long curTime = System.currentTimeMillis();
             Date curDate = new Date(curTime);
 
-            if (curDate.compareTo(names.get(i).getTime()) > 0) {
+
+            System.out.println(MyDate.dateToString(curDate));
+            System.out.println(MyDate.dateToString(names.get(i).getTime()));
+
+            if (MyDate.dateToString(curDate).equals(MyDate.dateToString(names.get(i).getTime()))) {
                 if (names.get(i).getDescription().contains("   TODAY")) {
                     logger.info("find item for today ");
                 } else {
                     names.get(i).setDescription(names.get(i).getDescription() + "   TODAY");
                 }
-            }
 
+            } else {
+                //1558990800000 - 28/05/2019
+                //1559077200000 - 29/05/2019
+                if (names.get(i).getDescription().contains("   IT'S ALREADY IMPOSSIBLE")) {
+                    logger.info("delete this, please ");
+                } else if (names.get(i).getDescription().contains("   TODAY")) {
+                    names.get(i).setDescription(names.get(i).getDescription() + "   IT'S ALREADY IMPOSSIBLE");
+                    logger.info("lolol ");
+                }
+
+            }
         }
+
     }
 
     public static void main(String[] args) {

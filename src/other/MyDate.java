@@ -11,4 +11,9 @@ public class MyDate {
         LocalDate localDate = LocalDate.parse(strDate, dateTimeFormatter);
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
+    public static String dateToString(Date date) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return localDate.format(dateTimeFormatter);
+    }
 }
